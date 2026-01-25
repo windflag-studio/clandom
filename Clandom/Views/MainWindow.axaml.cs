@@ -1,6 +1,7 @@
 using System;
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Interactivity;
 using FluentAvalonia.UI.Controls;
 
 namespace Clandom.Views;

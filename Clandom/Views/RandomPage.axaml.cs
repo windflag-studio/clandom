@@ -1,3 +1,4 @@
+using System;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
@@ -28,7 +29,7 @@ public partial class RandomPage : UserControl
         {
             var randId2D = new BalancedRand2D((int)RRaw.Value, (int)RCol.Value, minPoolSize: 3, maxGapThreshold: 3);
             var pos = randId2D.DrawPosition();
-            Result.Text = $"行：{pos.row}&列：{pos.col}";
+            Result.Text = $"行:{pos.row} 列:{pos.col}";
         }
     }
 }

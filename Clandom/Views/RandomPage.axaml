@@ -2,7 +2,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             mc:Ignorable="d" d:DesignWidth="637" d:DesignHeight="450"
              x:Class="Clandom.Views.RandomPage">
     <UserControl.Styles>
         <Style Selector="StackPanel">
@@ -13,29 +13,35 @@
             <Setter Property="VerticalAlignment" Value="Center"/>
             <Setter Property="HorizontalAlignment" Value="Center"/>
         </Style>
+        <Style Selector="NumericUpDown">
+            <Setter Property="Increment" Value="1"/>
+            <Setter Property="Width" Value="150"/>
+        </Style>
     </UserControl.Styles>
-    <Grid RowDefinitions="Auto *" Margin="8" RowSpacing="4">
-        <StackPanel Grid.Row="0">
+    <Grid RowDefinitions="Auto Auto *" Margin="8" RowSpacing="4">
+        <Grid ColumnDefinitions="Auto *" Grid.Row="0">
+            <TextBlock Grid.Column="0" Text="随机" FontSize="40" HorizontalAlignment="Left"/>
+            <Button Grid.Column="1" Content="黑/白名单设置" HorizontalAlignment="Right"/>
+        </Grid>
+        <StackPanel Grid.Row="1" VerticalAlignment="Bottom" Margin="4,0,0,8" Spacing="4" HorizontalAlignment="Center">
             <TabStrip Theme="{StaticResource TabStripStyle}">
                 <TabStripItem x:Name="IsId" Theme="{StaticResource TabItemStyle}" Content="抽学号"/>
                 <TabStripItem Theme="{StaticResource TabItemStyle}" Content="抽行列"/>
             </TabStrip>
-            <GridSplitter/>
             <StackPanel IsVisible="{Binding #IsId.IsSelected}">
                 <TextBlock Text="范围："/>
-                <NumericUpDown x:Name="RMinId" Minimum="1" Maximum="10000" Value="1" Width="150" Increment="1"/>
+                <NumericUpDown x:Name="RMinId" Minimum="1" Maximum="10000" Value="1"/>
                 <TextBlock Text="~"/>
-                <NumericUpDown x:Name="RMaxId" Minimum="2" Maximum="10001" Value="50" Width="150" Increment="1"/>
+                <NumericUpDown x:Name="RMaxId" Minimum="2" Maximum="10001" Value="50"/>
             </StackPanel>
             <StackPanel IsVisible="{Binding !#IsId.IsSelected}">
                 <TextBlock Text="行："/>
-                <NumericUpDown x:Name="RRaw" Minimum="1" Maximum="10000" Value="6" Width="150" Increment="1"/>
+                <NumericUpDown x:Name="RRaw" Minimum="1" Maximum="10000" Value="6"/>
                 <TextBlock Text="列："/>
-                <NumericUpDown x:Name="RCol" Minimum="2" Maximum="10001" Value="8" Width="150" Increment="1"/>
+                <NumericUpDown x:Name="RCol" Minimum="2" Maximum="10001" Value="8"/>
             </StackPanel>
-            <GridSplitter/>
-            <Button x:Name="Run" Content="来一个！" Click="Run_OnClick"/>
+            <Button x:Name="Run" Content="抽" Click="Run_OnClick"/>
         </StackPanel>
-        <TextBlock Grid.Row="1" x:Name="Result" Text="1" FontSize="200"/>
+        <TextBlock Grid.Row="2" x:Name="Result" Text="1" FontSize="150" TextWrapping="Wrap"/>
     </Grid>
 </UserControl>
