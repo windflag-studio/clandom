@@ -11,6 +11,8 @@ public partial class MainWindow : Window
     public MainWindow()
     {
         InitializeComponent();
+        var page = Activator.CreateInstance(Type.GetType("Clandom.Views.RandomPage") ?? throw new InvalidOperationException());
+        NavigationView.Content = page;
     }
 
     private void NavigationView_OnSelectionChanged(object? sender, NavigationViewSelectionChangedEventArgs e)
