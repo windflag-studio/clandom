@@ -36,9 +36,9 @@
             </StackPanel>
             <StackPanel IsVisible="{Binding !#IsId.IsSelected}">
                 <TextBlock Text="行："/>
-                <NumericUpDown x:Name="RRaw" Minimum="1" Maximum="10000" Value="6"/>
+                <NumericUpDown x:Name="RRaw" Minimum="1" Maximum="100" Value="6"/>
                 <TextBlock Text="列："/>
-                <NumericUpDown x:Name="RCol" Minimum="2" Maximum="10001" Value="8"/>
+                <NumericUpDown x:Name="RCol" Minimum="2" Maximum="100" Value="8"/>
             </StackPanel>
             <Button x:Name="Run" Content="抽" Click="Run_OnClick"/>
         </StackPanel>

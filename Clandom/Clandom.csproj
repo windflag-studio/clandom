@@ -24,4 +24,16 @@
         <PackageReference Include="FluentAvaloniaUI" Version="2.4.1" />
         <PackageReference Include="Xaml.Behaviors" Version="11.3.9.3" />
     </ItemGroup>
+
+    <ItemGroup>
+      <Compile Update="Views\Pages\RandomPage.axaml.cs">
+        <DependentUpon>RandomPage.axaml</DependentUpon>
+        <SubType>Code</SubType>
+      </Compile>
+      <Compile Update="Views\Pages\StatisticsPage.axaml.cs">
+        <DependentUpon>StatisticsPage.axaml</DependentUpon>
+        <SubType>Code</SubType>
+      </Compile>
+      <Compile Remove="Models\Global.cs" />
+    </ItemGroup>
 </Project>
