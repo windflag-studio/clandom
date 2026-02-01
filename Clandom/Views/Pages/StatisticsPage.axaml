@@ -2,7 +2,93 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
-             x:Class="Clandom.Views.StatisticsPage">
-    Welcome to Avalonia!
+             xmlns:vm="clr-namespace:Clandom.ViewModels"
+             xmlns:lvc="clr-namespace:LiveChartsCore.SkiaSharpView.Avalonia;assembly=LiveChartsCore.SkiaSharpView.Avalonia"
+             mc:Ignorable="d" d:DesignWidth="637" d:DesignHeight="450"
+             x:Class="Clandom.Views.Pages.StatisticsPage" x:DataType="vm:StatisticsPageViewModel"
+             Loaded="Control_OnLoaded">
+    
+    <UserControl.Styles>
+        <Style Selector="TextBlock">
+            <Setter Property="VerticalAlignment" Value="Center"/>
+        </Style>
+        <Style Selector="lvc|CartesianChart">
+            <Setter Property="ZoomMode" Value="X"></Setter>
+        </Style>
+    </UserControl.Styles>
+    
+    <UserControl.DataContext>
+        <vm:StatisticsPageViewModel/>
+    </UserControl.DataContext>
+    
+    <Grid RowDefinitions="Auto *" Margin="8" RowSpacing="4">
+        <TextBlock Grid.Row="0" Text="统计" FontSize="30" HorizontalAlignment="Left"/>
+        <Grid Grid.Row="1" 
+              ColumnDefinitions="* *" RowDefinitions="Auto * *" 
+              ColumnSpacing="4" RowSpacing="4">
+            
+            <Grid.Resources>
+                <lvc:SharedAxesPair x:Key="IdSharedAxes">
+
+                    <lvc:SharedAxesPair.First>
+                        <lvc:XamlAxis
+                            MaxLimit="{Binding IdMax}"/>
+                    </lvc:SharedAxesPair.First>
+
+                    <lvc:SharedAxesPair.Second>
+                        <lvc:XamlAxis
+                            MaxLimit="{Binding IdMax}" />
+                    </lvc:SharedAxesPair.Second>
+
+                </lvc:SharedAxesPair>
+                
+                <lvc:SharedAxesPair x:Key="PlaneSharedAxes">
+
+                    <lvc:SharedAxesPair.First>
+                        <lvc:XamlAxis
+                            MaxLimit="{Binding PlaneMax}"/>
+                    </lvc:SharedAxesPair.First>
+
+                    <lvc:SharedAxesPair.Second>
+                        <lvc:XamlAxis
+                            MaxLimit="{Binding PlaneMax}" />
+                    </lvc:SharedAxesPair.Second>
+
+                </lvc:SharedAxesPair>
+            </Grid.Resources>
+            
+            <Grid Grid.Column="0" Grid.Row="0" ColumnDefinitions="Auto *">
+                <TextBlock Grid.Column="0" Text="学号统计" FontSize="15"/>
+                <ComboBox Grid.Column="1" x:Name="IdStatisticsComboBox" HorizontalAlignment="Right" SelectionChanged="IdStatisticsComboBox_OnSelectionChanged"/>
+            </Grid>
+            
+            <!-- 学号图表 -->
+            <lvc:CartesianChart
+                Grid.Column="0" Grid.Row="1"
+                XAxes="{lvc:FromSharedAxes AxesPair={StaticResource IdSharedAxes}, Element=First}"
+                ZoomMode="X" Series="{Binding IdWeightSeries}"/>
+
+            <lvc:CartesianChart
+                Grid.Column="0" Grid.Row="2" Margin="0,-4,0,0"
+                XAxes="{lvc:FromSharedAxes AxesPair={StaticResource IdSharedAxes}, Element=Second}"
+                ZoomMode="X" Series="{Binding IdCountsSeries}"/>
+            
+            <Grid Grid.Column="1" Grid.Row="0" ColumnDefinitions="Auto *">
+                <TextBlock Grid.Column="0" Text="行列统计" FontSize="15"/>
+                <ComboBox Grid.Column="1" x:Name="PlaneStatisticsComboBox" HorizontalAlignment="Right" SelectionChanged="TDStatisticsComboBox_OnSelectionChanged"/>
+            </Grid>
+            <!-- 座位图表 -->
+            
+            <lvc:CartesianChart
+                Grid.Column="1" Grid.Row="1"
+                XAxes="{lvc:FromSharedAxes AxesPair={StaticResource PlaneSharedAxes}, Element=First}"
+                ZoomMode="X" Series="{Binding PlaneWeightSeries}"/>
+
+            <lvc:CartesianChart
+                Grid.Column="1" Grid.Row="2" Margin="0,-4,0,0"
+                XAxes="{lvc:FromSharedAxes AxesPair={StaticResource PlaneSharedAxes}, Element=Second}"
+                ZoomMode="X" Series="{Binding PlaneCountsSeries}"/>
+            
+        </Grid>
+    </Grid>
 </UserControl>

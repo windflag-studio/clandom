@@ -120,7 +120,7 @@ namespace Clandom.Models.BalancedRandom
                 if (data.Type == type)
                 {
                     // 根据类型进行不同的匹配逻辑
-                    if (type == "BalancedRand2D")
+                    if (type == "BalancedRandPlane")
                     {
                         // 对于2D类型，检查行列是否匹配
                         // 这里可以根据需要实现更复杂的匹配逻辑
@@ -129,6 +129,267 @@ namespace Clandom.Models.BalancedRandom
             }
             
             return null;
+        }
+        
+        /// <summary>
+        /// 获取所有学号范围数据
+        /// </summary>
+        /// <param name="filePath">数据文件路径</param>
+        /// <returns>二维列表，每个子列表表示一个学号范围 [start, end]</returns>
+        public static List<List<int>> GetAllIdData(string filePath = "balanced_rand_data.json")
+        {
+            var allData = LoadAllData(filePath);
+            var result = new List<List<int>>();
+            
+            foreach (var data in allData.Values)
+            {
+                if (data.Type == "BalancedRand_Range")
+                {
+                    // 学号范围数据
+                    result.Add(new List<int> { data.NumberRangeStart, data.NumberRangeEnd });
+                }
+            }
+            
+            return result;
+        }
+        
+        /// <summary>
+        /// 获取所有2D行列配置
+        /// </summary>
+        /// <param name="filePath">数据文件路径</param>
+        /// <returns>二维列表，每个子列表表示一个2D配置 [rows, cols]</returns>
+        public static List<List<int>> GetAllPlaneData(string filePath = "balanced_rand_data.json")
+        {
+            var allData = LoadAllData(filePath);
+            var result = new List<List<int>>();
+            
+            foreach (var data in allData.Values)
+            {
+                if (data.Type == "BalancedRandPlane")
+                {
+                    // 2D行列数据
+                    result.Add(new List<int> { data.Rows, data.Cols });
+                }
+            }
+            
+            return result;
+        }
+        
+        /// <summary>
+        /// 从指定学号范围中读取权重列表
+        /// </summary>
+        /// <param name="range">学号范围，如 [1, 50]</param>
+        /// <param name="filePath">数据文件路径</param>
+        /// <returns>权重列表，按学号顺序排列</returns>
+        public static List<double> GetWeightsByIdRange(List<int> range, string filePath = "balanced_rand_data.json")
+        {
+            if (range == null || range.Count != 2)
+                throw new ArgumentException("学号范围参数必须包含两个元素 [start, end]");
+            
+            var allData = LoadAllData(filePath);
+            
+            // 查找匹配的学号范围数据
+            foreach (var data in allData.Values)
+            {
+                if (data.Type == "BalancedRand_Range" && 
+                    data.NumberRangeStart == range[0] && 
+                    data.NumberRangeEnd == range[1])
+                {
+                    return GetNumberRangeWeightList(data);
+                }
+            }
+            
+            // 未找到匹配的数据
+            throw new KeyNotFoundException($"未找到匹配的学号范围数据: [{range[0]}, {range[1]}]");
+        }
+        
+        /// <summary>
+        /// 从指定2D配置中读取权重列表
+        /// </summary>
+        /// <param name="range">2D配置，如 [3, 4] 表示3行4列</param>
+        /// <param name="filePath">数据文件路径</param>
+        /// <returns>权重列表，按位置顺序排列（行优先）</returns>
+        public static List<double> GetWeightsByPlaneRange(List<int> range, string filePath = "balanced_rand_data.json")
+        {
+            if (range == null || range.Count != 2)
+                throw new ArgumentException("Plane配置参数必须包含两个元素 [rows, cols]");
+            
+            var allData = LoadAllData(filePath);
+            
+            // 查找匹配的2D配置数据
+            foreach (var data in allData.Values)
+            {
+                if (data.Type == "BalancedRandPlane" && 
+                    data.Rows == range[0] && 
+                    data.Cols == range[1])
+                {
+                    return GetPlaneConfigWeightList(data);
+                }
+            }
+            
+            // 未找到匹配的数据
+            throw new KeyNotFoundException($"未找到匹配的Plane配置数据: [{range[0]}, {range[1]}]");
+        }
+        
+        /// <summary>
+        /// 从学号范围数据中提取权重列表（按学号顺序）
+        /// </summary>
+        private static List<double> GetNumberRangeWeightList(BalancedRandData data)
+        {
+            var weights = new List<double>();
+            
+            if (data.Type != "BalancedRand_Range")
+                throw new ArgumentException("数据类型必须是BalancedRand_Range");
+            
+            // 对于学号范围，按学号顺序提取权重
+            for (int i = data.NumberRangeStart; i <= data.NumberRangeEnd; i++)
+            {
+                if (data.CurrentProbabilities.ContainsKey(i))
+                {
+                    weights.Add(data.CurrentProbabilities[i]);
+                }
+                else
+                {
+                    weights.Add(0); // 未找到的学号权重设为0
+                }
+            }
+            
+            return weights;
+        }
+        
+        /// <summary>
+        /// 从2D配置数据中提取权重列表（按位置顺序，行优先）
+        /// </summary>
+        private static List<double> GetPlaneConfigWeightList(BalancedRandData data)
+        {
+            var weights = new List<double>();
+            
+            if (data.Type != "BalancedRandPlane")
+                throw new ArgumentException("数据类型必须是BalancedRandPlane");
+            
+            // 对于2D数据，按位置顺序提取权重（行优先）
+            int totalPositions = data.Rows * data.Cols;
+            for (int i = 0; i < totalPositions; i++)
+            {
+                if (data.CurrentProbabilities.ContainsKey(i))
+                {
+                    weights.Add(data.CurrentProbabilities[i]);
+                }
+                else
+                {
+                    weights.Add(0); // 未找到的位置权重设为0
+                }
+            }
+            
+            return weights;
+        }
+        /// <summary>
+        /// 从指定学号范围中读取抽取次数列表
+        /// </summary>
+        /// <param name="range">学号范围，如 [1, 50]</param>
+        /// <param name="filePath">数据文件路径</param>
+        /// <returns>抽取次数列表，按学号顺序排列</returns>
+        public static List<int> GetDrawCountsByIdRange(List<int> range, string filePath = "balanced_rand_data.json")
+        {
+            if (range == null || range.Count != 2)
+                throw new ArgumentException("学号范围参数必须包含两个元素 [start, end]");
+            
+            var allData = LoadAllData(filePath);
+            
+            // 查找匹配的学号范围数据
+            foreach (var data in allData.Values)
+            {
+                if (data.Type == "BalancedRand_Range" && 
+                    data.NumberRangeStart == range[0] && 
+                    data.NumberRangeEnd == range[1])
+                {
+                    return GetNumberRangeDrawCounts(data);
+                }
+            }
+            
+            // 未找到匹配的数据
+            throw new KeyNotFoundException($"未找到匹配的学号范围数据: [{range[0]}, {range[1]}]");
+        }
+        
+        /// <summary>
+        /// 从指定2D配置中读取抽取次数列表
+        /// </summary>
+        /// <param name="range">2D配置，如 [3, 4] 表示3行4列</param>
+        /// <param name="filePath">数据文件路径</param>
+        /// <returns>抽取次数列表，按位置顺序排列（行优先）</returns>
+        public static List<int> GetDrawCountsByPlaneRange(List<int> range, string filePath = "balanced_rand_data.json")
+        {
+            if (range == null || range.Count != 2)
+                throw new ArgumentException("Plane配置参数必须包含两个元素 [rows, cols]");
+            
+            var allData = LoadAllData(filePath);
+            
+            // 查找匹配的2D配置数据
+            foreach (var data in allData.Values)
+            {
+                if (data.Type == "BalancedRandPlane" && 
+                    data.Rows == range[0] && 
+                    data.Cols == range[1])
+                {
+                    return GetPlaneConfigDrawCounts(data);
+                }
+            }
+            
+            // 未找到匹配的数据
+            throw new KeyNotFoundException($"未找到匹配的Plane配置数据: [{range[0]}, {range[1]}]");
+        }
+        
+        /// <summary>
+        /// 从学号范围数据中提取抽取次数列表（按学号顺序）
+        /// </summary>
+        private static List<int> GetNumberRangeDrawCounts(BalancedRandData data)
+        {
+            var drawCounts = new List<int>();
+            
+            if (data.Type != "BalancedRand_Range")
+                throw new ArgumentException("数据类型必须是BalancedRand_Range");
+            
+            // 对于学号范围，按学号顺序提取抽取次数
+            for (int i = data.NumberRangeStart; i <= data.NumberRangeEnd; i++)
+            {
+                if (data.DrawCounts.ContainsKey(i))
+                {
+                    drawCounts.Add(data.DrawCounts[i]);
+                }
+                else
+                {
+                    drawCounts.Add(0); // 未找到的学号抽取次数设为0
+                }
+            }
+            
+            return drawCounts;
+        }
+        
+        /// <summary>
+        /// 从2D配置数据中提取抽取次数列表（按位置顺序，行优先）
+        /// </summary>
+        private static List<int> GetPlaneConfigDrawCounts(BalancedRandData data)
+        {
+            var drawCounts = new List<int>();
+            
+            if (data.Type != "BalancedRandPlane")
+                throw new ArgumentException("数据类型必须是BalancedRandPlane");
+            
+            // 对于2D数据，按位置顺序提取抽取次数（行优先）
+            int totalPositions = data.Rows * data.Cols;
+            for (int i = 0; i < totalPositions; i++)
+            {
+                if (data.DrawCounts.ContainsKey(i))
+                {
+                    drawCounts.Add(data.DrawCounts[i]);
+                }
+                else
+                {
+                    drawCounts.Add(0); // 未找到的位置抽取次数设为0
+                }
+            }
+            
+            return drawCounts;
         }
     }
 
@@ -385,39 +646,42 @@ namespace Clandom.Models.BalancedRandom
         public string GetTypeName() => _type;
 
         /// <summary>
-        /// 获取最后抽取轮次字典（受保护访问器）
+        /// 获取最后抽取轮次列表（按学号顺序）
         /// </summary>
-        protected Dictionary<int, int> GetLastDrawRoundInternal() => new Dictionary<int, int>(_lastDrawRound);
+        public List<int> GetLastDrawRounds()
+        {
+            return _allNumbers.OrderBy(n => n).Select(n => _lastDrawRound[n]).ToList();
+        }
 
         /// <summary>
-        /// 获取当前轮次（受保护访问器）
+        /// 获取当前轮次
         /// </summary>
-        protected int GetCurrentRoundInternal() => _currentRound;
+        public int GetCurrentRound() => _currentRound;
 
         /// <summary>
-        /// 获取总抽取次数（受保护访问器）
+        /// 获取总抽取次数
         /// </summary>
-        protected int GetTotalDrawsInternal() => _totalDraws;
+        public int GetTotalDraws() => _totalDraws;
 
         /// <summary>
-        /// 获取最小候选池大小（受保护访问器）
+        /// 获取最小候选池大小
         /// </summary>
-        protected int GetMinPoolSizeInternal() => _minPoolSize;
+        public int GetMinPoolSize() => _minPoolSize;
 
         /// <summary>
-        /// 获取最大差距阈值（受保护访问器）
+        /// 获取最大差距阈值
         /// </summary>
-        protected int GetMaxGapThresholdInternal() => _maxGapThreshold;
+        public int GetMaxGapThreshold() => _maxGapThreshold;
 
         /// <summary>
-        /// 获取冷启动提升系数（受保护访问器）
+        /// 获取冷启动提升系数
         /// </summary>
-        protected double GetColdStartBoostInternal() => _coldStartBoost;
+        public double GetColdStartBoost() => _coldStartBoost;
 
         /// <summary>
-        /// 获取衰减因子（受保护访问器）
+        /// 获取衰减因子
         /// </summary>
-        protected double GetDecayFactorInternal() => _decayFactor;
+        public double GetDecayFactor() => _decayFactor;
 
         /// <summary>
         /// 抽取一个学号
@@ -485,21 +749,22 @@ namespace Clandom.Models.BalancedRandom
         }
 
         /// <summary>
-        /// 获取当前抽取统计信息
+        /// 获取当前抽取统计列表（按学号顺序）
         /// </summary>
-        /// <returns>学号->抽取次数字典</returns>
-        public Dictionary<int, int> GetStatistics()
+        /// <returns>抽取次数列表，按学号顺序排列</returns>
+        public List<int> GetStatisticsList()
         {
-            return new Dictionary<int, int>(_drawCounts);
+            return _allNumbers.OrderBy(n => n).Select(n => _drawCounts[n]).ToList();
         }
 
         /// <summary>
-        /// 获取当前每个学号的抽取概率
+        /// 获取当前每个学号的抽取概率列表（按学号顺序）
         /// </summary>
-        /// <returns>学号->概率字典</returns>
-        public Dictionary<int, double> GetProbabilities()
+        /// <returns>概率列表，按学号顺序排列</returns>
+        public List<double> GetProbabilityList()
         {
-            return new Dictionary<int, double>(_currentProbabilities);
+            return _allNumbers.OrderBy(n => n).Select(n => 
+                _currentProbabilities.ContainsKey(n) ? _currentProbabilities[n] : 0).ToList();
         }
 
         /// <summary>
@@ -518,13 +783,13 @@ namespace Clandom.Models.BalancedRandom
         }
 
         /// <summary>
-        /// 获取当前候选池
+        /// 获取当前候选池列表（按学号顺序）
         /// </summary>
-        /// <returns>候选池学号列表</returns>
-        public List<int> GetCandidatePool()
+        /// <returns>候选池学号列表，按学号顺序排列</returns>
+        public List<int> GetCandidatePoolList()
         {
             Debug.Assert(_candidatePool != null, nameof(_candidatePool) + " != null");
-            return new List<int>(_candidatePool);
+            return _candidatePool.OrderBy(n => n).ToList();
         }
 
         /// <summary>
@@ -726,11 +991,11 @@ namespace Clandom.Models.BalancedRandom
     /// <summary>
     /// 扩展类：支持按行列抽取（模拟二维数组）
     /// </summary>
-    public class BalancedRand2D : BalancedRand
+    public class BalancedRandPlane : BalancedRand
     {
         private int _rows;
         private int _cols;
-        private string _dataId2D;
+        private string _dataIdPlane;
         
         /// <summary>
         /// 构造函数
@@ -742,7 +1007,7 @@ namespace Clandom.Models.BalancedRandom
         /// <param name="coldStartBoost">冷启动提升系数</param>
         /// <param name="decayFactor">权重衰减因子</param>
         /// <param name="loadData">是否从文件加载历史数据（默认true）</param>
-        public BalancedRand2D(int rows, int cols, int minPoolSize = 3, 
+        public BalancedRandPlane(int rows, int cols, int minPoolSize = 3, 
                             int maxGapThreshold = 5, double coldStartBoost = 2.0, 
                             double decayFactor = 0.7, bool loadData = true) 
             : base(0, rows * cols - 1, minPoolSize, maxGapThreshold, coldStartBoost, decayFactor, false)
@@ -751,7 +1016,7 @@ namespace Clandom.Models.BalancedRandom
             _cols = cols;
             
             // 生成2D专用的数据ID
-            _dataId2D = BalancedRandDataManager.GenerateId("BalancedRand2D", 
+            _dataIdPlane = BalancedRandDataManager.GenerateId("BalancedRandPlane", 
                 rows, cols, minPoolSize, maxGapThreshold, coldStartBoost, decayFactor);
             
             // 加载历史数据
@@ -771,16 +1036,16 @@ namespace Clandom.Models.BalancedRandom
                 var allData = BalancedRandDataManager.LoadAllData(filePath);
                 
                 // 优先使用2D专用ID，如果没有则尝试使用基类ID
-                if (allData.TryGetValue(_dataId2D, out var savedData) || 
-                    allData.TryGetValue(GetDataId(), out savedData))
+                if (allData.TryGetValue(_dataIdPlane, out var savedData) || 
+                    allData.TryGetValue(base.GetDataId(), out savedData))
                 {
                     ApplySavedData(savedData);
-                    Debug.WriteLine($"已加载2D数据: {_dataId2D}");
+                    Debug.WriteLine($"已加载Plane数据: {_dataIdPlane}");
                 }
             }
             catch (Exception ex)
             {
-                Debug.WriteLine($"加载2D数据失败: {ex.Message}");
+                Debug.WriteLine($"加载Plane数据失败: {ex.Message}");
             }
         }
         
@@ -808,39 +1073,52 @@ namespace Clandom.Models.BalancedRandom
             {
                 var allData = BalancedRandDataManager.LoadAllData(filePath);
                 
+                // 获取基类的内部字典数据
+                var drawCountsField = typeof(BalancedRand).GetField("_drawCounts", 
+                    System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                var drawCounts = (Dictionary<int, int>)drawCountsField.GetValue(this);
+                
+                var lastDrawRoundField = typeof(BalancedRand).GetField("_lastDrawRound", 
+                    System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                var lastDrawRound = (Dictionary<int, int>)lastDrawRoundField.GetValue(this);
+                
+                var currentProbabilitiesField = typeof(BalancedRand).GetField("_currentProbabilities", 
+                    System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                var currentProbabilities = (Dictionary<int, double>)currentProbabilitiesField.GetValue(this);
+                
                 var data = new BalancedRandData
                 {
-                    Id = _dataId2D,
+                    Id = _dataIdPlane,
                     LastUpdated = DateTime.Now,
-                    DrawCounts = GetStatistics(),
-                    LastDrawRound = GetLastDrawRoundInternal(),
-                    CurrentRound = GetCurrentRoundInternal(),
-                    TotalDraws = GetTotalDrawsInternal(),
-                    CurrentProbabilities = GetProbabilities(),
-                    MinPoolSize = GetMinPoolSizeInternal(),
-                    MaxGapThreshold = GetMaxGapThresholdInternal(),
-                    ColdStartBoost = GetColdStartBoostInternal(),
-                    DecayFactor = GetDecayFactorInternal(),
-                    Type = "BalancedRand2D",
+                    DrawCounts = new Dictionary<int, int>(drawCounts),
+                    LastDrawRound = new Dictionary<int, int>(lastDrawRound),
+                    CurrentRound = GetCurrentRound(),
+                    TotalDraws = GetTotalDraws(),
+                    CurrentProbabilities = new Dictionary<int, double>(currentProbabilities),
+                    MinPoolSize = GetMinPoolSize(),
+                    MaxGapThreshold = GetMaxGapThreshold(),
+                    ColdStartBoost = GetColdStartBoost(),
+                    DecayFactor = GetDecayFactor(),
+                    Type = "BalancedRandPlane",
                     Rows = _rows,
                     Cols = _cols
                 };
                 
-                allData[_dataId2D] = data;
+                allData[_dataIdPlane] = data;
                 BalancedRandDataManager.SaveAllData(allData, filePath);
                 
-                Debug.WriteLine($"已保存2D数据: {_dataId2D}");
+                Debug.WriteLine($"已保存Plane数据: {_dataIdPlane}");
             }
             catch (Exception ex)
             {
-                Debug.WriteLine($"保存2D数据失败: {ex.Message}");
+                Debug.WriteLine($"保存Plane数据失败: {ex.Message}");
             }
         }
         
         /// <summary>
         /// 获取数据ID（2D专用）
         /// </summary>
-        public new string GetDataId() => _dataId2D;
+        public new string GetDataId() => _dataIdPlane;
         
         /// <summary>
         /// 抽取一个位置（返回行列，1-based索引）
@@ -871,35 +1149,19 @@ namespace Clandom.Models.BalancedRandom
         }
         
         /// <summary>
-        /// 获取位置统计信息（1-based索引）
+        /// 获取位置统计信息列表（按位置顺序，行优先）
         /// </summary>
-        public Dictionary<(int row, int col), int> GetPositionStatistics()
+        public List<int> GetPositionStatisticsList()
         {
-            var stats = GetStatistics();
-            return stats.ToDictionary(
-                kv => 
-                {
-                    int zeroBasedNumber = kv.Key - 1;
-                    return (zeroBasedNumber / _cols + 1, zeroBasedNumber % _cols + 1);
-                },
-                kv => kv.Value
-            );
+            return GetStatisticsList();
         }
         
         /// <summary>
-        /// 获取位置概率信息（1-based索引）
+        /// 获取位置概率信息列表（按位置顺序，行优先）
         /// </summary>
-        public Dictionary<(int row, int col), double> GetPositionProbabilities()
+        public List<double> GetPositionProbabilityList()
         {
-            var probs = GetProbabilities();
-            return probs.ToDictionary(
-                kv => 
-                {
-                    int zeroBasedNumber = kv.Key - 1;
-                    return (zeroBasedNumber / _cols + 1, zeroBasedNumber % _cols + 1);
-                },
-                kv => kv.Value
-            );
+            return GetProbabilityList();
         }
     }
 }

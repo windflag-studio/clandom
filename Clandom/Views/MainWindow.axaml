@@ -20,7 +20,7 @@
     </Window.Resources>
     <ui:NavigationView x:Name="NavigationView" SelectionChanged="NavigationView_OnSelectionChanged">
         <ui:NavigationView.MenuItems>
-            <ui:NavigationViewItem IconSource="{StaticResource FRandom}" Content="随机" Tag="RandomPage"/>
+            <ui:NavigationViewItem x:Name="HomePage" IconSource="{StaticResource FRandom}" Content="随机" Tag="RandomPage"/>
             <ui:NavigationViewItem IconSource="{StaticResource FStatistics}" Content="统计" Tag="StatisticsPage"/>
         </ui:NavigationView.MenuItems>
     </ui:NavigationView>

@@ -3,7 +3,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d" d:DesignWidth="637" d:DesignHeight="450"
-             x:Class="Clandom.Views.RandomPage">
+             x:Class="Clandom.Views.Pages.RandomPage">
     <UserControl.Styles>
         <Style Selector="StackPanel">
             <Setter Property="Spacing" Value="4"/>
@@ -20,7 +20,7 @@
     </UserControl.Styles>
     <Grid RowDefinitions="Auto Auto *" Margin="8" RowSpacing="4">
         <Grid ColumnDefinitions="Auto *" Grid.Row="0">
-            <TextBlock Grid.Column="0" Text="随机" FontSize="40" HorizontalAlignment="Left"/>
+            <TextBlock Grid.Column="0" Text="随机" FontSize="30" HorizontalAlignment="Left"/>
             <Button Grid.Column="1" Content="黑/白名单设置" HorizontalAlignment="Right"/>
         </Grid>
         <StackPanel Grid.Row="1" VerticalAlignment="Bottom" Margin="4,0,0,8" Spacing="4" HorizontalAlignment="Center">
@@ -40,7 +40,7 @@
                 <TextBlock Text="列："/>
                 <NumericUpDown x:Name="RCol" Minimum="2" Maximum="100" Value="8"/>
             </StackPanel>
-            <Button x:Name="Run" Content="抽" Click="Run_OnClick"/>
+            <Button x:Name="Run" Classes="accent" Content="抽" Click="Run_OnClick"/>
         </StackPanel>
         <TextBlock Grid.Row="2" x:Name="Result" Text="1" FontSize="150" TextWrapping="Wrap"/>
     </Grid>

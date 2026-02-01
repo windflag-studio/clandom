@@ -5,7 +5,7 @@ using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml;
 using Clandom.Models.BalancedRandom;
 
-namespace Clandom.Views;
+namespace Clandom.Views.Pages;
 
 public partial class RandomPage : UserControl
 {   
@@ -27,8 +27,8 @@ public partial class RandomPage : UserControl
         }
         else
         {
-            var randId2D = new BalancedRand2D((int)RRaw.Value, (int)RCol.Value);
-            var pos = randId2D.DrawPosition();
+            var randIdPlane = new BalancedRandPlane((int)RRaw.Value, (int)RCol.Value);
+            var pos = randIdPlane.DrawPosition();
             Result.Text = $"行:{pos.row} 列:{pos.col}";
         }
     }
