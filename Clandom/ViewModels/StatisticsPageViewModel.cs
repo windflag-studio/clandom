@@ -27,8 +27,9 @@ partial class StatisticsPageViewModel : ViewModelBase
     
     public Func<double, string> Labeler { get; set; } =
         value => value.ToString("N2");
-    public int IdMax => Math.Max(IdCountsData.Length, IdWeightData.Length);
-    public int PlaneMax => Math.Max(PlaneCountsData.Length, PlaneWeightData.Length);
+    public int IdMax => Math.Min(Math.Max(IdCountsData.Length, IdWeightData.Length),10);
+    public int PlaneMax => Math.Min(Math.Max(PlaneCountsData.Length, PlaneWeightData.Length),10);
+    
     public StatisticsPageViewModel()
     {
         RefreshIdSeries();

@@ -19,15 +19,15 @@
         </Style>
     </UserControl.Styles>
     <Grid RowDefinitions="Auto Auto *" Margin="8" RowSpacing="4">
-        <Grid ColumnDefinitions="Auto *" Grid.Row="0">
+        <Grid ColumnDefinitions="Auto * Auto" Grid.Row="0">
             <TextBlock Grid.Column="0" Text="随机" FontSize="30" HorizontalAlignment="Left"/>
-            <Button Grid.Column="1" Content="黑/白名单设置" HorizontalAlignment="Right"/>
-        </Grid>
-        <StackPanel Grid.Row="1" VerticalAlignment="Bottom" Margin="4,0,0,8" Spacing="4" HorizontalAlignment="Center">
-            <TabStrip Theme="{StaticResource TabStripStyle}">
+            <TabStrip Grid.Column="1" HorizontalAlignment="Center" Theme="{StaticResource TabStripStyle}">
                 <TabStripItem x:Name="IsId" Theme="{StaticResource TabItemStyle}" Content="抽学号"/>
                 <TabStripItem Theme="{StaticResource TabItemStyle}" Content="抽行列"/>
             </TabStrip>
+            <Button Grid.Column="2" Content="黑/白名单设置" HorizontalAlignment="Right"/>
+        </Grid>
+        <StackPanel Grid.Row="1" VerticalAlignment="Bottom" Margin="4,0,0,8" Spacing="4" HorizontalAlignment="Center">
             <StackPanel IsVisible="{Binding #IsId.IsSelected}">
                 <TextBlock Text="范围："/>
                 <NumericUpDown x:Name="RMinId" Minimum="1" Maximum="10000" Value="1"/>

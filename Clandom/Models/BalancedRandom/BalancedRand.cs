@@ -379,9 +379,9 @@ namespace Clandom.Models.BalancedRandom
             int totalPositions = data.Rows * data.Cols;
             for (int i = 0; i < totalPositions; i++)
             {
-                if (data.DrawCounts.ContainsKey(i))
+                if (data.DrawCounts.TryGetValue(i, out var count))
                 {
-                    drawCounts.Add(data.DrawCounts[i]);
+                    drawCounts.Add(count);
                 }
                 else
                 {

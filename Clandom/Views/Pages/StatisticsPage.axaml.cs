@@ -32,7 +32,7 @@ public partial class StatisticsPage : UserControl
         
         foreach (var dataTd in _planeData)
         {
-            PlaneStatisticsComboBox.Items.Add($"从{dataTd[0]}到{dataTd[1]}");
+            PlaneStatisticsComboBox.Items.Add($"{dataTd[0]}行{dataTd[1]}列");
         }
         PlaneStatisticsComboBox.SelectedIndex = 0;
     }

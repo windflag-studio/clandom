@@ -13,7 +13,7 @@
             <Setter Property="VerticalAlignment" Value="Center"/>
         </Style>
         <Style Selector="lvc|CartesianChart">
-            <Setter Property="ZoomMode" Value="X"></Setter>
+            <Setter Property="ZoomMode" Value="X"/>
         </Style>
     </UserControl.Styles>
     
@@ -21,7 +21,7 @@
         <vm:StatisticsPageViewModel/>
     </UserControl.DataContext>
     
-    <Grid RowDefinitions="Auto *" Margin="8" RowSpacing="4">
+    <Grid RowDefinitions="Auto *" Margin="12" RowSpacing="4">
         <TextBlock Grid.Row="0" Text="统计" FontSize="30" HorizontalAlignment="Left"/>
         <Grid Grid.Row="1" 
               ColumnDefinitions="* *" RowDefinitions="Auto * *" 
@@ -64,12 +64,12 @@
             
             <!-- 学号图表 -->
             <lvc:CartesianChart
-                Grid.Column="0" Grid.Row="1"
+                Grid.Column="0" Grid.Row="1" DrawMargin="70,Auto,Auto,Auto"
                 XAxes="{lvc:FromSharedAxes AxesPair={StaticResource IdSharedAxes}, Element=First}"
                 ZoomMode="X" Series="{Binding IdWeightSeries}"/>
 
             <lvc:CartesianChart
-                Grid.Column="0" Grid.Row="2" Margin="0,-4,0,0"
+                Grid.Column="0" Grid.Row="2" Margin="0,-4,0,0" DrawMargin="70,Auto,Auto,Auto"
                 XAxes="{lvc:FromSharedAxes AxesPair={StaticResource IdSharedAxes}, Element=Second}"
                 ZoomMode="X" Series="{Binding IdCountsSeries}"/>
             
@@ -80,12 +80,12 @@
             <!-- 座位图表 -->
             
             <lvc:CartesianChart
-                Grid.Column="1" Grid.Row="1"
+                Grid.Column="1" Grid.Row="1" DrawMargin="70,Auto,Auto,Auto"
                 XAxes="{lvc:FromSharedAxes AxesPair={StaticResource PlaneSharedAxes}, Element=First}"
                 ZoomMode="X" Series="{Binding PlaneWeightSeries}"/>
 
             <lvc:CartesianChart
-                Grid.Column="1" Grid.Row="2" Margin="0,-4,0,0"
+                Grid.Column="1" Grid.Row="2" Margin="0,-4,0,0" DrawMargin="70,Auto,Auto,Auto"
                 XAxes="{lvc:FromSharedAxes AxesPair={StaticResource PlaneSharedAxes}, Element=Second}"
                 ZoomMode="X" Series="{Binding PlaneCountsSeries}"/>
             
