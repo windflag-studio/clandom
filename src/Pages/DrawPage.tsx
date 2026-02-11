@@ -1,4 +1,4 @@
-import { Stack, ToggleButton, ToggleButtonGroup, Button, Alert, Grid } from '@mui/material';
+import { Stack, ToggleButton, ToggleButtonGroup, Button, Alert } from '@mui/material';
 import Grid3x3RoundedIcon from '@mui/icons-material/Grid3x3Rounded';
 import FaceRoundedIcon from '@mui/icons-material/FaceRounded';
 import * as React from 'react';
@@ -6,6 +6,7 @@ import { styled } from '@mui/material/styles';
 import Paper from '@mui/material/Paper';
 import NumberSpinner from '../Components/NumberSpinner';
 import { invoke } from '@tauri-apps/api/core';
+import ContainerAwareText from '../Components/ContainerAwareText';
 
 const Item = styled(Paper)(({ theme }) => ({
   backgroundColor: '#fff',
@@ -69,7 +70,7 @@ export default function DrawPage() {
   const handleDraw = async () => {
     setLoading(true);
     setError(null);
-    setResult('抽取中...');
+    //setResult('抽取中...');
 
     try {
       let res;
@@ -84,7 +85,7 @@ export default function DrawPage() {
           colNum
         });
       }
-      setResult(`结果: ${res}`);
+      setResult(`${res}`);
     } catch (err: any) {
       const errorMessage = err.toString();
       setError(`错误: ${errorMessage}`);
@@ -102,60 +103,66 @@ export default function DrawPage() {
   };
 
   return (
-    <>
-      <Grid container spacing={2} direction="column"
+    <Stack spacing={2}
+      sx={{
+        flex: 1,
+        overflow: 'auto',
+        width: '100%',
+        height: '100%'
+      }}>
+      <Stack direction={'row'} spacing={2}
         sx={{
-          justifyContent: "space-evenly",
-          alignItems: "center",
+          justifyContent: 'center',
+          alignItems: 'center'
         }}>
-        <Stack direction={'row'} spacing={2}
-          sx={{
-            justifyContent: 'center',
-            alignItems: 'center'
-          }}>
-          <Item>模式:</Item>
-          <ToggleButtonGroup exclusive aria-label='mode' value={alignment} onChange={handleAlignment}>
-            <ToggleButton value={"idMode"} aria-label='idMode'>
-              <FaceRoundedIcon />
-            </ToggleButton>
-            <ToggleButton value={"planeMode"} aria-label='planeMode'>
-              <Grid3x3RoundedIcon />
-            </ToggleButton>
-          </ToggleButtonGroup>
-          {alignment === 'idMode' ?
-            (<IdRangeComponent minId={minId} maxId={maxId} handleMinId={handleMinId} handleMaxId={handleMaxId} />) :
-            (<PlaneRangeComponent rowNum={rowNum} colNum={colNum} handleRowNum={handleRowNum} handleColNum={handleColNum} />)
-          }
-          <Button
-            variant="contained"
-            onClick={handleDraw}
-            disabled={loading}
-          >
-            抽！
-          </Button>
-        </Stack>
+        <Item>模式:</Item>
+        <ToggleButtonGroup size="small" exclusive aria-label='mode' value={alignment} onChange={handleAlignment}>
+          <ToggleButton value={"idMode"} aria-label='idMode'>
+            <FaceRoundedIcon />
+          </ToggleButton>
+          <ToggleButton value={"planeMode"} aria-label='planeMode'>
+            <Grid3x3RoundedIcon />
+          </ToggleButton>
+        </ToggleButtonGroup>
+        {alignment === 'idMode' ?
+          (<IdRangeComponent minId={minId} maxId={maxId} handleMinId={handleMinId} handleMaxId={handleMaxId} />) :
+          (<PlaneRangeComponent rowNum={rowNum} colNum={colNum} handleRowNum={handleRowNum} handleColNum={handleColNum} />)
+        }
+        <Button
+          variant="contained"
+          onClick={handleDraw}
+          disabled={loading}
+        >
+          抽！
+        </Button>
+      </Stack>
 
-        <Grid size="grow">
-          {error && (
-            <Alert severity="error" sx={{ mt: 2 }}>
-              {error}
-            </Alert>
-          )}
+      <div
+        style={{
+          flexGrow: 1,
+          minWidth: 0
+        }}>
+        {error && (
+          <Alert severity="error" sx={{ mt: 2 }}>
+            {error}
+          </Alert>
+        )}
 
-          <Item sx={{
-            flexGrow: 1,
-            minHeight: 60,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            fontSize: '1.2rem',
-            fontWeight: 'bold'
-          }}>
+        <Item sx={{
+          flexGrow: 1,
+          minHeight: 60,
+          display: 'flex',
+          fontWeight: 'bold',
+          justifyContent: "center",
+          alignItems: "center",
+          height: '100%'
+        }}>
+          <ContainerAwareText minFontSize={15} maxFontSize={300} scaleRatio={0.4}>
             {result}
-          </Item>
-        </Grid>
-      </Grid>
-    </>
+          </ContainerAwareText>
+        </Item>
+      </div>
+    </Stack>
   );
 }
 

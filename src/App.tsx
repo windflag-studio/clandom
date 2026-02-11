@@ -35,8 +35,7 @@ function TabPanel(props: TabPanelProps) {
     <div
       style={{
         flex: 1,
-        overflow: 'auto',
-        padding: '20px'
+        overflow: 'auto'
       }}
       role="tabpanel"
       hidden={value !== index}
@@ -45,11 +44,17 @@ function TabPanel(props: TabPanelProps) {
       {...other}
     >
       {value === index && (
-        <Box sx={{ p: 3 }}>
+        <Box
+          sx={{
+            p: 2,
+            width: '100%',
+            height: '100%'
+          }}>
           {children}
         </Box>
-      )}
-    </div>
+      )
+      }
+    </div >
   );
 }
 
