@@ -1,4 +1,5 @@
-import { Stack, ToggleButton, ToggleButtonGroup, Button, Alert } from '@mui/material';
+import { Stack, ToggleButton, ToggleButtonGroup, Button, Alert, Slider, Tooltip } from '@mui/material';
+import type { SliderValueLabelProps } from '@mui/material/Slider';
 import Grid3x3RoundedIcon from '@mui/icons-material/Grid3x3Rounded';
 import FaceRoundedIcon from '@mui/icons-material/FaceRounded';
 import * as React from 'react';
@@ -7,6 +8,28 @@ import Paper from '@mui/material/Paper';
 import NumberSpinner from '../Components/NumberSpinner';
 import { invoke } from '@tauri-apps/api/core';
 import ContainerAwareText from '../Components/ContainerAwareText';
+
+const minDistance = 5;
+const maxId = 190;
+
+const idMarks = [
+  {
+    value: 1,
+    label: '1',
+  },
+  {
+    value: 50,
+    label: '50',
+  },
+  {
+    value: 100,
+    label: '100',
+  },
+  {
+    value: 190,
+    label: '1000',
+  },
+];
 
 const Item = styled(Paper)(({ theme }) => ({
   backgroundColor: '#fff',
@@ -21,27 +44,27 @@ const Item = styled(Paper)(({ theme }) => ({
 }));
 
 export default function DrawPage() {
-  const [minId, setMinId] = React.useState<number>(1);
-  const [maxId, setMaxId] = React.useState<number>(50);
+  // const [minId, setMinId] = React.useState<number>(1);
+  // const [maxId, setMaxId] = React.useState<number>(50);
   const [rowNum, setRowNum] = React.useState<number>(6);
   const [colNum, setColNum] = React.useState<number>(8);
   const [alignment, setAlignment] = React.useState<string | null>('idMode');
   const [result, setResult] = React.useState<string>('等待抽取...');
   const [loading, setLoading] = React.useState<boolean>(false);
   const [error, setError] = React.useState<string | null>(null);
+  const [idRange, setIdRange] = React.useState<number[]>([20, 37]);
 
-  const handleMinId = (value: number | null, _: any) => {
-    if (value !== null) {
-      setMinId(value);
-      if (maxId <= value) {
-        setMaxId(value + 1);
+  const handleIdRange = (_: Event, newValue: number[], activeThumb: number) => {
+    if (newValue[1] - newValue[0] < minDistance) {
+      if (activeThumb === 0) {
+        const clamped = Math.min(newValue[0], maxId - minDistance);
+        setIdRange([clamped, clamped + minDistance]);
+      } else {
+        const clamped = Math.max(newValue[1], minDistance);
+        setIdRange([clamped - minDistance, clamped]);
       }
-    }
-  };
-
-  const handleMaxId = (value: number | null, _: any) => {
-    if (value !== null) {
-      setMaxId(value);
+    } else {
+      setIdRange(newValue);
     }
   };
 
@@ -76,8 +99,8 @@ export default function DrawPage() {
       let res;
       if (alignment === 'idMode') {
         res = await invoke('draw_id', {
-          minId,
-          maxId
+          minId: calculateIdValue(idRange[0]),
+          maxId: calculateIdValue(idRange[1])
         });
       } else {
         res = await invoke('draw_plane', {
@@ -125,7 +148,7 @@ export default function DrawPage() {
           </ToggleButton>
         </ToggleButtonGroup>
         {alignment === 'idMode' ?
-          (<IdRangeComponent minId={minId} maxId={maxId} handleMinId={handleMinId} handleMaxId={handleMaxId} />) :
+          (<IdRangeComponent idRange={idRange} handleIdRange={handleIdRange} />) :
           (<PlaneRangeComponent rowNum={rowNum} colNum={colNum} handleRowNum={handleRowNum} handleColNum={handleColNum} />)
         }
         <Button
@@ -157,7 +180,7 @@ export default function DrawPage() {
           alignItems: "center",
           height: '100%'
         }}>
-          <ContainerAwareText minFontSize={15} maxFontSize={300} scaleRatio={0.4}>
+          <ContainerAwareText minFontSize={15} maxFontSize={300} scaleRatio={0.6}>
             {result}
           </ContainerAwareText>
         </Item>
@@ -166,33 +189,52 @@ export default function DrawPage() {
   );
 }
 
-interface IdRangeComponentProps {
-  minId: number;
-  maxId: number;
-  handleMinId: (value: number | null, _: any) => void;
-  handleMaxId: (value: number | null, _: any) => void;
+function calculateIdValue(value: number) {
+  if (1 <= value && value <= 100) {
+    return value;
+  }
+  else if (value > 100) {
+    return 100 + (value - 100) * 10;
+  }
+  else {
+    return 1;
+  }
 }
 
-function IdRangeComponent({ minId, maxId, handleMinId, handleMaxId }: IdRangeComponentProps) {
+function idLabelFormat(value: number) {
+  return `${calculateIdValue(value)}`;
+}
+
+interface IdRangeComponentProps {
+  idRange: number[];
+  handleIdRange: (event: Event, newValue: number[], activeThumb: number) => void;
+}
+function IdValueLabelComponent(props: SliderValueLabelProps) {
+  const { children, value } = props;
+  let resultValue = calculateIdValue(Number(value));
+  
   return (
-    <>
-      <NumberSpinner
-        name="minId"
-        label="最小学号"
-        min={1}
-        max={10000}
-        value={minId}
-        onValueChange={handleMinId}
-      />
-      <NumberSpinner
-        name="maxId"
-        label="最大学号"
-        min={minId + 1}
-        max={10001}
-        value={maxId}
-        onValueChange={handleMaxId}
-      />
-    </>
+    <Tooltip enterTouchDelay={0} placement="top" title={resultValue}>
+      {children}
+    </Tooltip>
+  );
+}
+function IdRangeComponent({ idRange, handleIdRange }: IdRangeComponentProps) {
+  return (
+    <Slider
+      min={1}
+      max={maxId}
+      getAriaLabel={() => '学号范围'}
+      value={idRange}
+      onChange={handleIdRange}
+      valueLabelDisplay='auto'
+      marks={idMarks}
+      slots={{
+        valueLabel: IdValueLabelComponent,
+      }}
+      getAriaValueText={idLabelFormat}
+      disableSwap
+    />
   )
 }
 
