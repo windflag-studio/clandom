@@ -23,7 +23,7 @@
     
     <Grid RowDefinitions="Auto *" Margin="12" RowSpacing="4">
         <TextBlock Grid.Row="0" Text="统计" FontSize="30" HorizontalAlignment="Left"/>
-        <Grid Grid.Row="1" 
+        <Grid Grid.Row="1"
               ColumnDefinitions="* *" RowDefinitions="Auto * *" 
               ColumnSpacing="4" RowSpacing="4">
             
@@ -51,7 +51,7 @@
 
                     <lvc:SharedAxesPair.Second>
                         <lvc:XamlAxis
-                            MaxLimit="{Binding PlaneMax}" />
+                                      MaxLimit="{Binding PlaneMax}" />
                     </lvc:SharedAxesPair.Second>
 
                 </lvc:SharedAxesPair>

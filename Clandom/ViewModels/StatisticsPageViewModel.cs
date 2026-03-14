@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using LiveChartsCore;
 using LiveChartsCore.SkiaSharpView;
@@ -11,6 +13,9 @@ partial class StatisticsPageViewModel : ViewModelBase
     public static double[] IdWeightData;
     public static int[] PlaneCountsData;
     public static double[] PlaneWeightData;
+    
+    [ObservableProperty]
+    private IList<string> _planeLabelData;
     
     // 拆分成四个独立的系列
     [ObservableProperty]
@@ -27,8 +32,8 @@ partial class StatisticsPageViewModel : ViewModelBase
     
     public Func<double, string> Labeler { get; set; } =
         value => value.ToString("N2");
-    public int IdMax => Math.Min(Math.Max(IdCountsData.Length, IdWeightData.Length),10);
-    public int PlaneMax => Math.Min(Math.Max(PlaneCountsData.Length, PlaneWeightData.Length),10);
+    public int IdMax => Math.Max(IdCountsData.Length, IdWeightData.Length);
+    public int PlaneMax => Math.Max(PlaneCountsData.Length, PlaneWeightData.Length);
     
     public StatisticsPageViewModel()
     {

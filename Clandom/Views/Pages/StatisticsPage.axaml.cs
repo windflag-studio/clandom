@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using Avalonia;
 using Avalonia.Controls;
@@ -49,11 +50,53 @@ public partial class StatisticsPage : UserControl
 
     private void TDStatisticsComboBox_OnSelectionChanged(object? sender, SelectionChangedEventArgs e)
     {
-        if (IsInitialized&&_planeData.Count != 0)
+        if (IsInitialized && _planeData != null && _planeData.Count > 0 && 
+            PlaneStatisticsComboBox.SelectedIndex >= 0)
         {
-            StatisticsPageViewModel.PlaneCountsData = BalancedRandDataManager.GetDrawCountsByPlaneRange(_planeData[PlaneStatisticsComboBox.SelectedIndex]).ToArray();
-            StatisticsPageViewModel.PlaneWeightData = BalancedRandDataManager.GetWeightsByPlaneRange(_planeData[PlaneStatisticsComboBox.SelectedIndex]).ToArray();
-            (DataContext as StatisticsPageViewModel).RefreshPlaneSeries();
+            try
+            {
+                var countsDict = BalancedRandDataManager.GetDrawCountsByPlaneRange(
+                    _planeData[PlaneStatisticsComboBox.SelectedIndex]);
+                var weightsDict = BalancedRandDataManager.GetWeightsByPlaneRange(
+                    _planeData[PlaneStatisticsComboBox.SelectedIndex]);
+                
+                // 将字典转换为有序数组
+                var orderedCounts = new List<int>();
+                var orderedWeights = new List<double>();
+                var orderedLabels = new List<string>();
+                
+                // 按行列顺序排序
+                var rows = _planeData[PlaneStatisticsComboBox.SelectedIndex][0];
+                var cols = _planeData[PlaneStatisticsComboBox.SelectedIndex][1];
+                
+                for (int row = 0; row < rows; row++)
+                {
+                    for (int col = 0; col < cols; col++)
+                    {
+                        var key = new List<int> { col, row }; // 注意: GetPlaneConfigDrawCounts 返回的是 [col, row]
+                        if (countsDict.TryGetValue(key, out var count))
+                            orderedCounts.Add(count);
+                        else
+                            orderedCounts.Add(0);
+                            
+                        if (weightsDict.TryGetValue(key, out var weight))
+                            orderedWeights.Add(weight);
+                        else
+                            orderedWeights.Add(0);
+                            
+                        orderedLabels.Add($"[{row+1},{col+1}]");
+                    }
+                }
+                
+                StatisticsPageViewModel.PlaneCountsData = orderedCounts.ToArray();
+                StatisticsPageViewModel.PlaneWeightData = orderedWeights.ToArray();
+                (DataContext as StatisticsPageViewModel).PlaneLabelData = orderedLabels.ToArray();
+                (DataContext as StatisticsPageViewModel).RefreshPlaneSeries();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"加载平面统计数据失败: {ex.Message}");
+            }
         }
     }
 }
